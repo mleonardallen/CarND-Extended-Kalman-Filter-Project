@@ -12,29 +12,37 @@ KalmanFilter::KalmanFilter() {
 
   previous_timestamp_ = 0;
 
+  // Process noise
   noise_ax_ = 9;
-
   noise_ay_ = 9;
 
-  // State Transition Matrix
+  // State transition matrix
   F_ = MatrixXd(4, 4);
   F_ << 1, 0, 1, 0,
     0, 1, 0, 1,
     0, 0, 1, 0,
     0, 0, 0, 1;
 
-  // State Covariance Matrix
+  // State covariance matrix
   P_ = MatrixXd(4, 4);
   P_ << 1, 0, 0, 0,
     0, 1, 0, 0,
     0, 0, 1000, 0,
     0, 0, 0, 1000;
 
-  // note: Measurement Covariance Matrix (R_) found in measurement packages.
+  // Note: The following matrices are owned by the measurement package since they differ between measurement type.
+  // Measurement covariance matrix (R) 
+  // Measurement matrix (H)
 }
 
 KalmanFilter::~KalmanFilter() {}
 
+/**
+ * Process new measurement
+ *
+ * @param measurement_pack Current measurement
+ * @return The state estimate after measurement update is applied
+ */
 VectorXd KalmanFilter::ProcessMeasurement(MeasurementPackage *measurement_pack) {
 
   /*****************************************************************************
@@ -43,7 +51,7 @@ VectorXd KalmanFilter::ProcessMeasurement(MeasurementPackage *measurement_pack) 
 
   if (!is_initialized_) {
     // first measurement
-    x_ = measurement_pack->getState();
+    x_ = measurement_pack->getMeasurement();
     // done initializing, no need to predict or update
     is_initialized_ = true;
     return x_;
@@ -68,6 +76,11 @@ VectorXd KalmanFilter::ProcessMeasurement(MeasurementPackage *measurement_pack) 
   return x_;
 }
 
+/**
+ * Predicts the state and the state covariance using the process model
+ *
+ * @param delta_T Elapsed time since last measurement
+ */
 void KalmanFilter::Predict(float delta_T) {
 
   //1. Modify the F matrix so that time is integrated
@@ -93,9 +106,14 @@ void KalmanFilter::Predict(float delta_T) {
   P_ = F_ * P_ * Ft + Q_;
 }
 
+/**
+ * Updates the state by using standard Kalman Filter equations
+ *
+ * @param measurement_pack The measurement at k+1
+ */
 void KalmanFilter::Update(MeasurementPackage *measurement_pack) {
 
-  // error, measurement matrix, and measurement covariance depend on measurement package type.
+  // error, measurement matrix, and measurement covariance matrix depend on measurement package type.
   VectorXd y = measurement_pack->getError(x_);
   MatrixXd H = measurement_pack->getMeasurementMatrix(x_);
   MatrixXd R = measurement_pack->getMeasurementCovariance();

@@ -10,7 +10,7 @@ using Eigen::VectorXd;
 using Eigen::MatrixXd;
 
 /**
- * Measurement covariance
+ * Measurement covariance matrix (R)
  */
 MatrixXd RadarMeasurementPackage::R_ = (
   MatrixXd(3, 3) << 0.09, 0, 0,
@@ -20,7 +20,8 @@ MatrixXd RadarMeasurementPackage::R_ = (
 
 /**
  * Constructor
- * @param line measurement data
+ *
+ * @param line Sensor data
  */
 RadarMeasurementPackage::RadarMeasurementPackage(string line) {
 
@@ -50,31 +51,39 @@ RadarMeasurementPackage::RadarMeasurementPackage(string line) {
 }
 
 /*
- * Get state from measurement.
- * note: converts measurement from polar to cartesian.
+ * Note: Converts measurement from polar to cartesian
+ * @return Measurement matrix (H)
  */
-VectorXd RadarMeasurementPackage::getState() {
+VectorXd RadarMeasurementPackage::getMeasurement() {
   return toCartesian(raw_measurements_);
 }
 
 /**
- * @param x_state the predicted state
+ * Get measurement matrix (H)
+ * Note: Uses CalculateJacobian function
+ *
+ * @param x_state The predicted state
+ * @return Measurement matrix (H)
  */
 MatrixXd RadarMeasurementPackage::getMeasurementMatrix(const VectorXd& x_state) {
   return CalculateJacobian(x_state);
 }
 
 /**
- * Get measurement covariance
+ * Get measurement covariance matrix (R)
+ *
+ * @return Measurement covariance matrix (R)
  */
 MatrixXd RadarMeasurementPackage::getMeasurementCovariance() {
   return R_;
 }
 
 /**
- * Get prediction error
- * @param x_state the predicted state
- * note: first converts predicted state to polar representation
+ * Get error [y = z - h(x')]
+ * Note: First converts the predicted state to polar representation
+ *
+ * @param x_state The predicted state
+ * @return Error
  */
 VectorXd RadarMeasurementPackage::getError(const VectorXd& x_state) {
   VectorXd x_pred = toPolar(x_state);
@@ -84,12 +93,15 @@ VectorXd RadarMeasurementPackage::getError(const VectorXd& x_state) {
 
 /**
  * Convert polar to cartesian
+ *
+ * @param x_state The state (polar)
+ * @return The state (cartesian)
  */
-VectorXd RadarMeasurementPackage::toCartesian(const VectorXd& x_state_polar) {
+VectorXd RadarMeasurementPackage::toCartesian(const VectorXd& x_state) {
   VectorXd x_state_cartesian = VectorXd(4);
 
-  float ro = x_state_polar[0];
-  float theta = x_state_polar[1];
+  float ro = x_state[0];
+  float theta = x_state[1];
 
   x_state_cartesian << ro * cos(theta), ro * sin(theta), 0, 0;
 
@@ -98,6 +110,9 @@ VectorXd RadarMeasurementPackage::toCartesian(const VectorXd& x_state_polar) {
 
 /**
  * Convert cartesian to polar
+ *
+ * @param x_state The state (cartesian)
+ * @return The state (polar)
  */
 VectorXd RadarMeasurementPackage::toPolar(const VectorXd& x_state) {
 
@@ -115,7 +130,7 @@ VectorXd RadarMeasurementPackage::toPolar(const VectorXd& x_state) {
   float sqrt_px_2_py_2 = sqrt(px_2 + py_2);
 
   x_state_polar[0] = sqrt_px_2_py_2;
-  x_state_polar[1] = atan(py/px);
+  x_state_polar[1] = atan2(py, px);
   x_state_polar[2] = (px*vx + py*vy) / sqrt_px_2_py_2;
 
   return x_state_polar;
@@ -123,6 +138,9 @@ VectorXd RadarMeasurementPackage::toPolar(const VectorXd& x_state) {
 
 /**
  * Calculate Jacobian
+ * 
+ * @param x_state The predicted state
+ * @return Jacobian for measurement matrix (H)
  */
 MatrixXd RadarMeasurementPackage::CalculateJacobian(const VectorXd& x_state) {
 

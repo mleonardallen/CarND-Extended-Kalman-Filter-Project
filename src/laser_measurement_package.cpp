@@ -9,7 +9,7 @@ using Eigen::VectorXd;
 using Eigen::MatrixXd;
 
 /**
- * Measurement Covariance
+ * Measurement covariance (R)
  */
 MatrixXd LaserMeasurementPackage::R_ = (
   MatrixXd(2, 2) << 0.0225, 0,
@@ -17,7 +17,7 @@ MatrixXd LaserMeasurementPackage::R_ = (
 ).finished();
 
 /**
- * Measurement Matrix
+ * Measurement matrix (H)
  */
 MatrixXd LaserMeasurementPackage::H_ = (
   MatrixXd(2, 4) << 1, 0, 0, 0,
@@ -25,15 +25,16 @@ MatrixXd LaserMeasurementPackage::H_ = (
 ).finished();
 
 /*
- * Constructor.
- * @param line sensor data
+ * Constructor
+ *
+ * @param line Sensor data
  */
 LaserMeasurementPackage::LaserMeasurementPackage(string line) {
 
   istringstream iss(line);
   sensor_type_ = MeasurementPackage::LASER;
 
-  // Raw Measurement
+  // Raw measurement
   raw_measurements_ = VectorXd(2);
   float x;
   float y;
@@ -42,7 +43,7 @@ LaserMeasurementPackage::LaserMeasurementPackage(string line) {
   iss >> sensor_type >> x >> y >> timestamp_;
   raw_measurements_ << x, y;
 
-  // Ground Truth
+  // Ground truth
   gt_values_ = VectorXd(4);
   float x_gt;
   float y_gt;
@@ -54,9 +55,11 @@ LaserMeasurementPackage::LaserMeasurementPackage(string line) {
 }
 
 /*
- * Get state from measurement.
+ * Get measurement
+ *
+ * @return Measurement
  */
-VectorXd LaserMeasurementPackage::getState() {
+VectorXd LaserMeasurementPackage::getMeasurement() {
 
   VectorXd init = VectorXd(4);
   init << raw_measurements_[0], raw_measurements_[1], 0, 0;
@@ -65,23 +68,29 @@ VectorXd LaserMeasurementPackage::getState() {
 }
 
 /*
- * Get measurement matrix
- * @param x_state the predicted state
+ * Get measurement matrix (H)
+ *
+ * @param x_state The predicted state
+ * @return Measurement matrix (H)
  */
 MatrixXd LaserMeasurementPackage::getMeasurementMatrix(const VectorXd& x_state) {
   return H_;
 }
 
 /**
- * Get measurement covariance
+ * Get measurement covariance matrix (R)
+ *
+ * @return Measurement covariance matrix (R)
  */
 MatrixXd LaserMeasurementPackage::getMeasurementCovariance() {
   return R_;
 }
 
 /**
- * Get error
- * @param x_state the predicted state
+ * Get Error (y = z - Hx')
+ *
+ * @param x_state The predicted state
+ * @return Error
  */
 Eigen::VectorXd LaserMeasurementPackage::getError(const VectorXd& x_state) {
   MatrixXd H = getMeasurementMatrix(x_state);

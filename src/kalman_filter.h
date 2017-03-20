@@ -18,25 +18,14 @@ public:
   virtual ~KalmanFilter();
 
   /**
-   * Init Initializes Kalman filter
-   * @param x_in Initial state
-   * @param P_in Initial state covariance
-   * @param F_in Transition matrix
-   * @param H_in Measurement matrix
-   * @param R_in Measurement covariance matrix
-   * @param Q_in Process covariance matrix
-   */
-
-  /**
-   * Prediction Predicts the state and the state covariance
-   * using the process model
+   * Predicts the state and the state covariance using the process model
    * @param delta_T Time between k and k+1 in s
    */
   void Predict(float);
 
   /**
    * Updates the state by using standard Kalman Filter equations
-   * @param z The measurement at k+1
+   * @param measurement_pack The measurement at k+1
    */
   void Update(MeasurementPackage *measurement_pack);
 
@@ -66,10 +55,10 @@ private:
   // previous timestamp
   long previous_timestamp_;
 
-  //
+  // process noise
   float noise_ax_;
 
-  //
+  // process noise
   float noise_ay_;
 
 };

@@ -12,15 +12,29 @@ public:
   */
   RadarMeasurementPackage(std::string);
 
-  Eigen::VectorXd getState();
-  Eigen::MatrixXd getMeasurementMatrix(const Eigen::VectorXd&);
-  Eigen::MatrixXd getMeasurementCovariance();
-  Eigen::VectorXd getError(const Eigen::VectorXd&);
-  Eigen::VectorXd toPolar(const Eigen::VectorXd&);
-  Eigen::VectorXd toCartesian(const Eigen::VectorXd&);
-  Eigen::MatrixXd CalculateJacobian(const Eigen::VectorXd&);
-
+  // Measurement Covariance Matrix
   static Eigen::MatrixXd R_;
+
+  // Get Measurement (Cartesian)
+  Eigen::VectorXd getMeasurement();
+
+  // Get Measurement Matrix (H)
+  Eigen::MatrixXd getMeasurementMatrix(const Eigen::VectorXd&);
+
+  // Get Measurement Covariance Matrix (R)
+  Eigen::MatrixXd getMeasurementCovariance();
+
+  // Get Error (y = z - Hx')
+  Eigen::VectorXd getError(const Eigen::VectorXd&);
+
+  // Convert Measurement from Cartesian to Polar
+  Eigen::VectorXd toPolar(const Eigen::VectorXd&);
+
+  // Convert Measurement from Polar to Cartesian
+  Eigen::VectorXd toCartesian(const Eigen::VectorXd&);
+
+  // Calculate Jacobian
+  Eigen::MatrixXd CalculateJacobian(const Eigen::VectorXd&);
 
 };
 

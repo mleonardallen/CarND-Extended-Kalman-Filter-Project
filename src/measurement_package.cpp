@@ -9,9 +9,18 @@
 using namespace std;
 using Eigen::VectorXd;
 
+/**
+ * Get MeasurementPackage instance
+ * Note: Creates concrete class based on first element in the sensor data:
+ *
+ *  L: Laser
+ *  R: Radar
+ *
+ * @param line Sensor data
+ * @return Concrete MeasurementPackage instance
+ */
 MeasurementPackage *MeasurementPackage::create(string line) {
 
-  // reads first element from the current line
   MeasurementPackage *meas_package;
   istringstream iss(line);
   string sensor_type;

@@ -14,16 +14,29 @@ public:
     RADAR
   } sensor_type_;
 
+  // Raw Measurements
   Eigen::VectorXd raw_measurements_;
+
+  // Ground Truth Values
   Eigen::VectorXd gt_values_;
 
+  // Measurement Covariance Matrix
+  static Eigen::MatrixXd R_;
+
+  // MeasurementPackage Factory
   static MeasurementPackage *create(std::string);
 
-  virtual Eigen::VectorXd getState() = 0;
+  // Get Measurement
+  virtual Eigen::VectorXd getMeasurement() = 0;
+
+  // Get Measurement Matrix (H)
   virtual Eigen::MatrixXd getMeasurementMatrix(const Eigen::VectorXd&) = 0;
+
+  // Get Measurement Covariance Matrix (R)
   virtual Eigen::MatrixXd getMeasurementCovariance() = 0;
+
+  // Get Error (y = z - Hx')
   virtual Eigen::VectorXd getError(const Eigen::VectorXd&) = 0;
-  static Eigen::MatrixXd R_;
 
 };
 

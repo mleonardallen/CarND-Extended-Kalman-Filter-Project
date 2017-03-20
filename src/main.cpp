@@ -88,7 +88,7 @@ int main(int argc, char* argv[]) {
     out_file_ << x_(3) << "\t";
 
     // output the measurements
-    VectorXd state = meas_package->getState();
+    VectorXd state = meas_package->getMeasurement();
     out_file_ << state[0] << "\t";
     out_file_ << state[1] << "\t";
 
