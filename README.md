@@ -30,7 +30,6 @@ If you'd like to generate your own radar and lidar data, see the
 Matlab scripts that can generate additional data.
 
 ## Dataset #1 Output
-
 ```
 Accuracy - RMSE:
 0.0651649
@@ -38,12 +37,9 @@ Accuracy - RMSE:
   0.54319
  0.544191
 ```
-
 ![Dataset #1 Output](https://github.com/mleonardallen/CarND-Extended-Kalman-Filter-Project/blob/master/images/data-1.png)
 
-
 ## Dataset #2 Output
-
 ```
 Accuracy - RMSE:
 0.185496
@@ -51,5 +47,4 @@ Accuracy - RMSE:
 0.476755
 0.804468
 ```
-
 ![Dataset #2 Output](https://github.com/mleonardallen/CarND-Extended-Kalman-Filter-Project/blob/master/images/data-2.png)
