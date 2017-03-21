@@ -36,8 +36,8 @@ LaserMeasurementPackage::LaserMeasurementPackage(string line) {
 
   // Raw measurement
   raw_measurements_ = VectorXd(2);
-  float x;
-  float y;
+  double x;
+  double y;
   string sensor_type;
 
   iss >> sensor_type >> x >> y >> timestamp_;
@@ -45,10 +45,10 @@ LaserMeasurementPackage::LaserMeasurementPackage(string line) {
 
   // Ground truth
   gt_values_ = VectorXd(4);
-  float x_gt;
-  float y_gt;
-  float vx_gt;
-  float vy_gt;
+  double x_gt;
+  double y_gt;
+  double vx_gt;
+  double vy_gt;
 
   iss >> x_gt >> y_gt >> vx_gt >> vy_gt;
   gt_values_ << x_gt, y_gt, vx_gt, vy_gt;

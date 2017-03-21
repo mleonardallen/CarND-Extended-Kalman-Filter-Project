@@ -30,9 +30,9 @@ RadarMeasurementPackage::RadarMeasurementPackage(string line) {
   sensor_type_ = MeasurementPackage::RADAR;
   raw_measurements_ = VectorXd(3);
 
-  float ro;
-  float theta;
-  float ro_dot;
+  double ro;
+  double theta;
+  double ro_dot;
 
   string sensor_type;
 
@@ -41,10 +41,10 @@ RadarMeasurementPackage::RadarMeasurementPackage(string line) {
 
   // Ground Truth
   gt_values_ = VectorXd(4);
-  float x_gt;
-  float y_gt;
-  float vx_gt;
-  float vy_gt;
+  double x_gt;
+  double y_gt;
+  double vx_gt;
+  double vy_gt;
 
   iss >> x_gt >> y_gt >> vx_gt >> vy_gt;
   gt_values_ << x_gt, y_gt, vx_gt, vy_gt;
@@ -87,7 +87,6 @@ MatrixXd RadarMeasurementPackage::getMeasurementCovariance() {
  */
 VectorXd RadarMeasurementPackage::getError(const VectorXd& x_state) {
   VectorXd x_pred = toPolar(x_state);
-
   return raw_measurements_ - x_pred;
 }
 
@@ -100,8 +99,8 @@ VectorXd RadarMeasurementPackage::getError(const VectorXd& x_state) {
 VectorXd RadarMeasurementPackage::toCartesian(const VectorXd& x_state) {
   VectorXd x_state_cartesian = VectorXd(4);
 
-  float ro = x_state[0];
-  float theta = x_state[1];
+  double ro = x_state(0);
+  double theta = x_state(1);
 
   x_state_cartesian << ro * cos(theta), ro * sin(theta), 0, 0;
 
@@ -119,19 +118,26 @@ VectorXd RadarMeasurementPackage::toPolar(const VectorXd& x_state) {
   VectorXd x_state_polar = VectorXd(3);
 
   //recover state parameters
-  float px = x_state[0];
-  float py = x_state[1];
-  float vx = x_state[2];
-  float vy = x_state[3];
+  double px = x_state(0);
+  double py = x_state(1);
+  double vx = x_state(2);
+  double vy = x_state(3);
 
   // pre-compute a set of terms to avoid repeated calculation
-  float px_2 = px * px;
-  float py_2 = py * py;
-  float sqrt_px_2_py_2 = sqrt(px_2 + py_2);
+  double px_2 = px * px;
+  double py_2 = py * py;
+  double sqrt_px_2_py_2 = sqrt(px_2 + py_2);
 
-  x_state_polar[0] = sqrt_px_2_py_2;
-  x_state_polar[1] = atan2(py, px);
-  x_state_polar[2] = (px*vx + py*vy) / sqrt_px_2_py_2;
+  // avoid division by zero
+  if (sqrt_px_2_py_2 == 0) {
+    cout << "toPolar () - Error - Division by Zero" << endl;
+    x_state_polar << 0, 0, 0;
+    return x_state_polar;
+  }
+
+  x_state_polar(0) = sqrt_px_2_py_2;
+  x_state_polar(1) = atan2(py, px);
+  x_state_polar(2) = (px*vx + py*vy) / sqrt_px_2_py_2;
 
   return x_state_polar;
 }
@@ -147,19 +153,22 @@ MatrixXd RadarMeasurementPackage::CalculateJacobian(const VectorXd& x_state) {
   MatrixXd Hj(3,4);
 
   //recover state parameters
-  float px = x_state(0);
-  float py = x_state(1);
-  float vx = x_state(2);
-  float vy = x_state(3);
+  double px = x_state(0);
+  double py = x_state(1);
+  double vx = x_state(2);
+  double vy = x_state(3);
 
   //pre-compute a set of terms to avoid repeated calculation
-  float c1 = px*px+py*py;
-  float c2 = sqrt(c1);
-  float c3 = (c1*c2);
+  double c1 = px*px+py*py;
+  double c2 = sqrt(c1);
+  double c3 = (c1*c2);
 
   //check division by zero
   if(fabs(c1) < 0.0001) {
     cout << "CalculateJacobian () - Error - Division by Zero" << endl;
+    Hj << 0, 0, 0, 0,
+      1e+9, 1e+9, 0, 0,
+      0, 0, 0, 0;
     return Hj;
   }
 

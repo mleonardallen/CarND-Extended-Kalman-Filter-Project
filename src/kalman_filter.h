@@ -21,7 +21,7 @@ public:
    * Predicts the state and the state covariance using the process model
    * @param delta_T Time between k and k+1 in s
    */
-  void Predict(float);
+  void Predict(double);
 
   /**
    * Updates the state by using standard Kalman Filter equations
@@ -56,10 +56,10 @@ private:
   long previous_timestamp_;
 
   // process noise
-  float noise_ax_;
+  double noise_ax_;
 
   // process noise
-  float noise_ay_;
+  double noise_ay_;
 
 };
 

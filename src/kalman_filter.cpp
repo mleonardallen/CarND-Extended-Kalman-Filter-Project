@@ -52,6 +52,7 @@ VectorXd KalmanFilter::ProcessMeasurement(MeasurementPackage *measurement_pack) 
   if (!is_initialized_) {
     // first measurement
     x_ = measurement_pack->getMeasurement();
+    previous_timestamp_ = measurement_pack->timestamp_;
     // done initializing, no need to predict or update
     is_initialized_ = true;
     return x_;
@@ -62,7 +63,10 @@ VectorXd KalmanFilter::ProcessMeasurement(MeasurementPackage *measurement_pack) 
    ****************************************************************************/
 
   // delta_T - expressed in seconds
-  float delta_T = (measurement_pack->timestamp_ - previous_timestamp_) / 1000000.0;
+  double delta_T = (measurement_pack->timestamp_ - previous_timestamp_) / 1000000.0;
+  if (delta_T == 0) {
+    delta_T = 1;
+  }
   previous_timestamp_ = measurement_pack->timestamp_;
 
   Predict(delta_T);
@@ -81,7 +85,7 @@ VectorXd KalmanFilter::ProcessMeasurement(MeasurementPackage *measurement_pack) 
  *
  * @param delta_T Elapsed time since last measurement
  */
-void KalmanFilter::Predict(float delta_T) {
+void KalmanFilter::Predict(double delta_T) {
 
   //1. Modify the F matrix so that time is integrated
   F_(0, 2) = delta_T;
@@ -90,10 +94,10 @@ void KalmanFilter::Predict(float delta_T) {
   //2. Set the process covariance matrix Q
   
   // pre-compute a set of terms to avoid repeated calculation
-  float delta_T_2 = delta_T * delta_T;
-  float delta_T_3 = delta_T_2 * delta_T;
-  float delta_T_4 = delta_T_3 * delta_T;
-  
+  double delta_T_2 = delta_T * delta_T;
+  double delta_T_3 = delta_T_2 * delta_T;
+  double delta_T_4 = delta_T_3 * delta_T;
+
   Q_ = MatrixXd(4, 4);
   Q_ << delta_T_4/4 * noise_ax_, 0, delta_T_3/2 * noise_ax_, 0,
     0, delta_T_4/4 * noise_ay_, 0, delta_T_3/2 * noise_ay_,
@@ -104,6 +108,7 @@ void KalmanFilter::Predict(float delta_T) {
   x_ = F_ * x_;
   MatrixXd Ft = F_.transpose();
   P_ = F_ * P_ * Ft + Q_;
+
 }
 
 /**
@@ -120,13 +125,13 @@ void KalmanFilter::Update(MeasurementPackage *measurement_pack) {
 
   MatrixXd Ht = H.transpose();
   MatrixXd S = H * P_ * Ht + R;
-
   MatrixXd Si = S.inverse();
   MatrixXd PHt = P_ * Ht;
   MatrixXd K = PHt * Si;
 
   //new estimate
   x_ = x_ + (K * y);
+
   long x_size = x_.size();
   MatrixXd I = MatrixXd::Identity(x_size, x_size);
   P_ = (I - K * H) * P_;
