@@ -37,7 +37,6 @@ Accuracy - RMSE:
 0.0605378
   0.54319
  0.544191
-
 ```
 
 ![Dataset #1 Output](https://github.com/mleonardallen/CarND-Extended-Kalman-Filter-Project/blob/master/images/data-1.png)
