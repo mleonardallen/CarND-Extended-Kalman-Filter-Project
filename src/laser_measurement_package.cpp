@@ -93,8 +93,6 @@ MatrixXd LaserMeasurementPackage::getMeasurementCovariance() {
  * @return Error
  */
 Eigen::VectorXd LaserMeasurementPackage::getError(const VectorXd& x_state) {
-  MatrixXd H = getMeasurementMatrix(x_state);
-  VectorXd x_pred = H * x_state;
-
-  return raw_measurements_ - x_pred;
+  VectorXd z_pred = H_ * x_state;
+  return raw_measurements_ - z_pred;
 }

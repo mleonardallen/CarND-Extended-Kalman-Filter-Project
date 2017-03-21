@@ -100,6 +100,7 @@ int main(int argc, char* argv[]) {
 
     estimations.push_back(x_);
     ground_truth.push_back(meas_package->gt_values_);
+
   }
 
   // compute the accuracy (RMSE)

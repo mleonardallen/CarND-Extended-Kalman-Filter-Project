@@ -62,14 +62,11 @@ VectorXd KalmanFilter::ProcessMeasurement(MeasurementPackage *measurement_pack) 
    *  Prediction
    ****************************************************************************/
 
-  // delta_T - expressed in seconds
-  double delta_T = (measurement_pack->timestamp_ - previous_timestamp_) / 1000000.0;
-  if (delta_T == 0) {
-    delta_T = 1;
-  }
+  // dt - expressed in seconds
+  double dt = (measurement_pack->timestamp_ - previous_timestamp_) / 1000000.0;
   previous_timestamp_ = measurement_pack->timestamp_;
 
-  Predict(delta_T);
+  Predict(dt);
 
   /*****************************************************************************
    *  Update
@@ -83,32 +80,31 @@ VectorXd KalmanFilter::ProcessMeasurement(MeasurementPackage *measurement_pack) 
 /**
  * Predicts the state and the state covariance using the process model
  *
- * @param delta_T Elapsed time since last measurement
+ * @param dt Elapsed time since last measurement
  */
-void KalmanFilter::Predict(double delta_T) {
+void KalmanFilter::Predict(double dt) {
 
   //1. Modify the F matrix so that time is integrated
-  F_(0, 2) = delta_T;
-  F_(1, 3) = delta_T;
+  F_(0, 2) = dt;
+  F_(1, 3) = dt;
 
   //2. Set the process covariance matrix Q
   
   // pre-compute a set of terms to avoid repeated calculation
-  double delta_T_2 = delta_T * delta_T;
-  double delta_T_3 = delta_T_2 * delta_T;
-  double delta_T_4 = delta_T_3 * delta_T;
+  double dt_2 = dt * dt;
+  double dt_3 = dt_2 * dt;
+  double dt_4 = dt_3 * dt;
 
   Q_ = MatrixXd(4, 4);
-  Q_ << delta_T_4/4 * noise_ax_, 0, delta_T_3/2 * noise_ax_, 0,
-    0, delta_T_4/4 * noise_ay_, 0, delta_T_3/2 * noise_ay_,
-    delta_T_3/2 * noise_ax_, 0, delta_T_2 * noise_ax_, 0,
-    0, delta_T_3/2 * noise_ay_, 0, delta_T_2 * noise_ay_;
+  Q_ << dt_4/4 * noise_ax_, 0, dt_3/2 * noise_ax_, 0,
+    0, dt_4/4 * noise_ay_, 0, dt_3/2 * noise_ay_,
+    dt_3/2 * noise_ax_, 0, dt_2 * noise_ax_, 0,
+    0, dt_3/2 * noise_ay_, 0, dt_2 * noise_ay_;
 
   //3. Predict
   x_ = F_ * x_;
   MatrixXd Ft = F_.transpose();
   P_ = F_ * P_ * Ft + Q_;
-
 }
 
 /**
